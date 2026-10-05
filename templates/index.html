@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spam Message Detector</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .header {
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 35px auto;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .welcome p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            box-sizing: border-box;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            resize: vertical;
+            font-size: 16px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2563eb;
+        }
+
+        form button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background: #1d4ed8;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .spam-result {
+            background: #fff1f2;
+            color: #b91c1c;
+            border: 2px solid #ef4444;
+        }
+
+        .genuine-result {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 2px solid #22c55e;
+        }
+
+        .info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .info-box {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+        }
+
+        .info-box h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+
+        .info-box p {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .history {
+            width: 90%;
+            max-width: 1000px;
+            margin: 35px auto;
+        }
+
+        .history h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 22px;
+            margin-bottom: 18px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+        }
+
+        .spam-item {
+            border-left: 6px solid #ef4444;
+            background: #fff7f7;
+        }
+
+        .genuine-item {
+            border-left: 6px solid #22c55e;
+            background: #f7fff9;
+        }
+
+        .history-item p {
+            line-height: 1.6;
+        }
+
+        .history-result {
+            font-weight: bold;
+        }
+
+        .history-reason {
+            color: #b91c1c;
+        }
+
+        .history-suggestion {
+            color: #475569;
+        }
+
+        .history-alternative {
+            color: #15803d;
+        }
+
+        .history-time,
+        .history-risk,
+        .history-summary {
+            color: #475569;
+        }
+
+        .history-keywords {
+            color: #b45309;
+        }
+
+        .history-links {
+            color: #2563eb;
+            word-break: break-word;
+        }
+
+
+        /* =========================
+           SPAM DANGER SCREEN
+           ========================= */
+
+        .danger-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: dangerFade 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .danger-box {
+            width: 90%;
+            max-width: 700px;
+            box-sizing: border-box;
+            padding: 60px 30px;
+            text-align: center;
+            background: #fffafa;
+            border: 3px solid #ef4444;
+            border-radius: 25px;
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.20);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .danger-icon {
+            font-size: 75px;
+            position: relative;
+            animation: dangerPulse 0.8s infinite alternate;
+        }
+
+        .danger-title {
+            color: #b91c1c;
+            font-size: 34px;
+            font-weight: bold;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .danger-risk {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .risk-high {
+            color: #dc2626;
+        }
+
+        .risk-medium {
+            color: #ea580c;
+        }
+
+        .risk-low {
+            color: #ca8a04;
+        }
+
+        .danger-message {
+            color: #64748b;
+            font-size: 17px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .details-button {
+            display: inline-block;
+            padding: 13px 28px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .details-button:hover {
+            background: #b91c1c;
+        }
+
+        .countdown {
+            margin-top: 15px;
+            color: #64748b;
+            font-size: 14px;
+            position: relative;
+        }
+
+
+        /* =========================
+           GENUINE SAFE SCREEN
+           ========================= */
+
+        .safe-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f0fdf4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: safeFade 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .safe-box {
+            width: 90%;
+            max-width: 700px;
+            box-sizing: border-box;
+            padding: 60px 30px;
+            text-align: center;
+            background: #fafffb;
+            border: 3px solid #22c55e;
+            border-radius: 25px;
+            box-shadow: 0 0 40px rgba(34,197,94,0.20);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .safe-icon {
+            font-size: 75px;
+            position: relative;
+            animation: safePulse 0.8s infinite alternate;
+        }
+
+        .safe-title {
+            color: #15803d;
+            font-size: 34px;
+            font-weight: bold;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .safe-message {
+            color: #475569;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .safe-countdown {
+            color: #64748b;
+            font-size: 14px;
+            position: relative;
+        }
+
+
+        /* =========================
+           ANIMATIONS
+           ========================= */
+
+        @keyframes dangerPulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.12);
+            }
+        }
+
+        @keyframes dangerFade {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes safePulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.12);
+            }
+        }
+
+        @keyframes safeFade {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 800px) {
+
+            .info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .danger-title,
+            .safe-title {
+                font-size: 28px;
+            }
+
+            .danger-box,
+            .safe-box {
+                padding: 45px 20px;
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .info {
+                grid-template-columns: 1fr;
+            }
+
+            .danger-icon,
+            .safe-icon {
+                font-size: 60px;
+            }
+
+            .danger-title,
+            .safe-title {
+                font-size: 24px;
+            }
+
+            .safe-message {
+                font-size: 18px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+    <!-- =========================
+         GENUINE SAFE SCREEN
+         ========================= -->
+
+    {% if result and 'NOT SPAM / GENUINE MESSAGE' in result %}
+
+    <div class="safe-screen">
+
+        <div class="safe-box">
+
+            <div class="safe-icon">
+                🛡️
+            </div>
+
+            <div class="safe-title">
+                SAFE MESSAGE
+            </div>
+
+            <div class="safe-message">
+                Genuine message detected!
+            </div>
+
+            <div class="safe-countdown">
+                Opening details in <span id="safeTimer">3</span> seconds...
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let safeTimeLeft = 3;
+
+        const safeTimerInterval = setInterval(function () {
+
+            safeTimeLeft--;
+
+            document.getElementById("safeTimer").textContent = safeTimeLeft;
+
+            if (safeTimeLeft <= 0) {
+
+                clearInterval(safeTimerInterval);
+
+                window.location.href = "/genuine-details";
+
+            }
+
+        }, 1000);
+
+    </script>
+
+    {% endif %}
+
+
+    <!-- =========================
+         SPAM DANGER SCREEN
+         ========================= -->
+
+    {% if result and 'SPAM MESSAGE' in result %}
+
+    <div class="danger-screen">
+
+        <div class="danger-box">
+
+            <div class="danger-icon">
+
+                {% if 'HIGH RISK' in history[-1].risk %}
+                    🚨
+                {% elif 'MEDIUM RISK' in history[-1].risk %}
+                    ⚠️
+                {% else %}
+                    🔶
+                {% endif %}
+
+            </div>
+
+            <div class="danger-title">
+                DANGER DETECTED
+            </div>
+
+            <div class="danger-risk
+                {% if 'HIGH RISK' in history[-1].risk %}
+                    risk-high
+                {% elif 'MEDIUM RISK' in history[-1].risk %}
+                    risk-medium
+                {% else %}
+                    risk-low
+                {% endif %}">
+
+                {{ history[-1].risk }}
+
+            </div>
+
+            <div class="danger-message">
+                Spam message detected!
+            </div>
+
+            <button class="details-button" onclick="openDetails()">
+                View Details →
+            </button>
+
+            <div class="countdown">
+                Opening details in <span id="timer">3</span> seconds...
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let timeLeft = 3;
+
+        const spamTimer = setInterval(function () {
+
+            timeLeft--;
+
+            document.getElementById("timer").textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+
+                clearInterval(spamTimer);
+
+                openDetails();
+
+            }
+
+        }, 1000);
+
+
+        function openDetails() {
+
+            window.location.href = "/spam-details";
+
+        }
+
+    </script>
+
+    {% endif %}
+
+
+    <!-- =========================
+         MAIN DASHBOARD
+         ========================= -->
+
+    <div class="header">
+        🛡️ Spam Message Detector
+    </div>
+
+
+    <div class="container">
+
+        <div class="welcome">
+
+            <h1>
+                Message Security Dashboard
+            </h1>
+
+            <p>
+                Check whether a message is Spam or Genuine using our detection system.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <form action="/check" method="POST">
+
+                <textarea
+                    name="message"
+                    placeholder="Enter your message here..."
+                    required></textarea>
+
+                <button type="submit">
+                    🔍 Check Message
+                </button>
+
+            </form>
+
+
+            {% if result %}
+
+                <div class="result
+                    {% if 'SPAM MESSAGE' in result %}
+                        spam-result
+                    {% else %}
+                        genuine-result
+                    {% endif %}">
+
+                    {{ result }}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- DASHBOARD INFORMATION -->
+
+        <div class="info">
+
+            <div class="info-box">
+                <h3>📊 Messages Checked</h3>
+                <p>{{ total_checked }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>🚨 Spam Detected</h3>
+                <p>{{ spam_detected }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>📈 Spam Rate</h3>
+                <p>{{ spam_rate }}%</p>
+            </div>
+
+            <div class="info-box">
+                <h3>✅ Genuine Messages</h3>
+                <p>{{ genuine_detected }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>🔍 Detection</h3>
+                <p>Analyze messages for suspicious words.</p>
+            </div>
+
+            <div class="info-box">
+                <h3>⚡ Fast</h3>
+                <p>Get the result quickly after checking a message.</p>
+            </div>
+
+            <div class="info-box">
+                <h3>🛡️ Protection</h3>
+                <p>Helps identify potentially unwanted messages.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MESSAGE HISTORY
+         ========================= -->
+
+    <div class="history">
+
+        <h2>
+            📋 Message History
+        </h2>
+
+
+        {% if history %}
+
+            {% for item in history %}
+
+                <div class="history-item
+                    {% if 'SPAM MESSAGE' in item.result %}
+                        spam-item
+                    {% else %}
+                        genuine-item
+                    {% endif %}">
+
+
+                    <p>
+                        <strong>Message:</strong>
+                        {{ item.message }}
+                    </p>
+
+
+                    <p class="history-result">
+                        <strong>Result:</strong>
+                        {{ item.result }}
+                    </p>
+
+
+                    <p class="history-reason">
+                        <strong>🔍 Detection Reason:</strong>
+                        {{ item.reason }}
+                    </p>
+
+
+                    <p class="history-suggestion">
+                        <strong>💡 Safety Suggestion:</strong>
+                        {{ item.suggestion }}
+                    </p>
+
+
+                    <p class="history-alternative">
+                        <strong>✍️ Safer Alternative:</strong>
+                        {{ item.alternative }}
+                    </p>
+
+
+                    <p class="history-time">
+                        <strong>🕐 Checked On:</strong>
+                        {{ item.time }}
+                    </p>
+
+
+                    <p class="history-risk">
+                        <strong>⚠️ Risk Level:</strong>
+                        {{ item.risk }}
+                    </p>
+
+
+                    <p class="history-summary">
+                        <strong>📊 Detection Summary:</strong>
+                        {{ item.summary }}
+                    </p>
+
+
+                    {% if item.keywords %}
+
+                        <p class="history-keywords">
+                            <strong>⚠️ Suspicious Keywords:</strong>
+                            {{ item.keywords | join(", ") }}
+                        </p>
+
+                    {% endif %}
+
+
+                    {% if item.links %}
+
+                        <p class="history-links">
+
+                            <strong>🔗 Suspicious Link:</strong>
+
+                            {% for link in item.links %}
+
+                                {{ link }}
+
+                            {% endfor %}
+
+                        </p>
+
+                    {% endif %}
+
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No messages checked yet.</p>
+
+        {% endif %}
+
+    </div>
+
+
+</body>
+</html>

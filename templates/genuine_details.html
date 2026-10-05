@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genuine Message Details</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .header {
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .title {
+            text-align: center;
+            color: #15803d;
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .status-card {
+            text-align: center;
+            padding: 30px;
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+            border-radius: 18px;
+            margin-bottom: 25px;
+        }
+
+        .status-icon {
+            font-size: 60px;
+        }
+
+        .status-title {
+            color: #15803d;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .status-message {
+            color: #475569;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .label {
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .message {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .risk {
+            color: #15803d;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #0f172a;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: #1e293b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        🛡️ Spam Message Detector
+    </div>
+
+    <div class="container">
+
+        <div class="title">
+            ✅ Genuine Message Information
+        </div>
+
+        <div class="status-card">
+
+            <div class="status-icon">
+                🛡️
+            </div>
+
+            <div class="status-title">
+                SAFE MESSAGE
+            </div>
+
+            <div class="status-message">
+                No strong spam pattern detected
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="label">
+                Detected Message
+            </div>
+
+            <div class="message">
+                {{ data.message }}
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="label">
+                Risk Level
+            </div>
+
+            <div class="risk">
+                {{ data.risk }}
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="label">
+                Detection Reason
+            </div>
+
+            {{ data.reason }}
+
+        </div>
+
+        <div class="card">
+
+            <div class="label">
+                Safety Suggestion
+            </div>
+
+            {{ data.suggestion }}
+
+        </div>
+
+        <div class="card">
+
+            <div class="label">
+                Checked Time
+            </div>
+
+            {{ data.time }}
+
+        </div>
+
+        <a href="/" class="back-button">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>

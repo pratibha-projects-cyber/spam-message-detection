@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spam Message Details</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .header {
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        .title {
+            text-align: center;
+            color: #b91c1c;
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .label {
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .message {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .risk {
+            color: #dc2626;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .reason {
+            color: #b91c1c;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #0f172a;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            background: #1e293b;
+        }
+        /* Risk Status Card */
+
+.status-card {
+    text-align: center;
+    padding: 30px;
+    border-radius: 18px;
+    margin-bottom: 25px;
+    border: 2px solid;
+}
+
+.status-icon {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+.status-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.status-message {
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.high-status {
+    background: #fff1f2;
+    border-color: #ef4444;
+    color: #b91c1c;
+}
+
+.medium-status {
+    background: #fff7ed;
+    border-color: #f97316;
+    color: #c2410c;
+}
+
+.low-status {
+    background: #fffbeb;
+    border-color: #eab308;
+    color: #a16207;
+}
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        🛡️ Spam Message Detector
+    </div>
+
+    <div class="container">
+{% if 'HIGH RISK' in data.risk %}
+
+<div class="status-card high-status">
+    <div class="status-icon">🚨</div>
+    <div class="status-title">HIGH RISK</div>
+    <div class="status-message">Spam Message Detected</div>
+</div>
+
+{% elif 'MEDIUM RISK' in data.risk %}
+
+<div class="status-card medium-status">
+    <div class="status-icon">⚠️</div>
+    <div class="status-title">MEDIUM RISK</div>
+    <div class="status-message">Suspicious Message Detected</div>
+</div>
+
+{% else %}
+
+<div class="status-card low-status">
+    <div class="status-icon">🔶</div>
+    <div class="status-title">LOW RISK</div>
+    <div class="status-message">Low Risk Message</div>
+</div>
+
+{% endif %}
+        <div class="title">
+            🚨 Spam Detection Information
+        </div>
+
+        <div class="card">
+            <div class="label">Detected Message</div>
+
+            <div class="message">
+                {{ data.message }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="label">Risk Level</div>
+
+            <div class="risk">
+                {{ data.risk }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="label">Detection Reason</div>
+
+            <div class="reason">
+                {{ data.reason }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="label">Suspicious Keywords</div>
+
+            {% if data.keywords %}
+                {{ data.keywords | join(', ') }}
+            {% else %}
+                No suspicious keywords found.
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="label">Suspicious Links</div>
+
+            {% if data.links %}
+                {{ data.links | join(', ') }}
+            {% else %}
+                No suspicious links found.
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="label">Safety Suggestion</div>
+
+            {{ data.suggestion }}
+        </div>
+
+        <div class="card">
+            <div class="label">Safer Alternative</div>
+
+            {{ data.alternative }}
+        </div>
+
+        <div class="card">
+            <div class="label">Checked Time</div>
+
+            {{ data.time }}
+        </div>
+
+        <a href="/" class="back-button">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</body>
+</html>
