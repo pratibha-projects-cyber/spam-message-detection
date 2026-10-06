@@ -3,12 +3,73 @@ import csv
 import re
 from collections import Counter
 from datetime import datetime
+import sqlite3
 app = Flask(__name__)
 
 total_checked = 0
 spam_detected = 0
 genuine_detected = 0
 history = []
+#create permanent history database
+# Create permanent history database
+def init_db():
+    conn = sqlite3.connect("history.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message TEXT,
+            result TEXT,
+            reason TEXT,
+            suggestion TEXT,
+            alternative TEXT,
+            keywords TEXT,
+            links TEXT,
+            time TEXT,
+            risk TEXT,
+            summary TEXT
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+init_db()
+def load_history():
+    conn = sqlite3.connect("history.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT message, result, reason, suggestion, alternative,
+               keywords, links, time, risk, summary
+        FROM history
+        ORDER BY id ASC
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    loaded_history = []
+
+    for row in rows:
+        loaded_history.append({
+            "message": row[0],
+            "result": row[1],
+            "reason": row[2],
+            "suggestion": row[3],
+            "alternative": row[4],
+            "keywords": row[5].split(", ") if row[5] else [],
+            "links": row[6].split(", ") if row[6] else [],
+            "time": row[7],
+            "risk": row[8],
+            "summary": row[9]
+        })
+
+    return loaded_history
+
+history = load_history()
+
 # Suspicious keywords
 suspicious_keywords = [
     "free",
@@ -202,6 +263,30 @@ def check_message():
         "risk": risk_level,
         "summary": summary
     })
+        # Save history permanently in database
+    conn = sqlite3.connect("history.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO history
+        (message, result, reason, suggestion, alternative,
+         keywords, links, time, risk, summary)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        message,
+        result,
+        reason,
+        suggestion,
+        alternative,
+        ", ".join(found_keywords),
+        ", ".join(found_links),
+        checked_time,
+        risk_level,
+        summary
+    ))
+
+    conn.commit()
+    conn.close()
 
     # Calculate spam rate
     spam_rate = round(

@@ -694,20 +694,99 @@
     </div>
 
 
-    <!-- =========================
-         MESSAGE HISTORY
-         ========================= -->
+  <!-- =========================
+     MESSAGE HISTORY
+     ========================= -->
 
-    <div class="history">
+<div class="history">
 
-        <h2>
-            📋 Message History
-        </h2>
+    <h2>📋 Message History</h2>
+
+    {% if history %}
+
+        <!-- Current History -->
+        <div class="history-item
+            {% if 'SPAM MESSAGE' in history[-1].result %}
+                spam-item
+            {% else %}
+                genuine-item
+            {% endif %}">
+
+            <p>
+                <strong>Message:</strong>
+                {{ history[-1].message }}
+            </p>
+
+            <p class="history-result">
+                <strong>Result:</strong>
+                {{ history[-1].result }}
+            </p>
+
+            <p class="history-reason">
+                <strong>🔍 Detection Reason:</strong>
+                {{ history[-1].reason }}
+            </p>
+
+            <p class="history-suggestion">
+                <strong>💡 Safety Suggestion:</strong>
+                {{ history[-1].suggestion }}
+            </p>
+
+            <p class="history-alternative">
+                <strong>✍️ Safer Alternative:</strong>
+                {{ history[-1].alternative }}
+            </p>
+
+            <p class="history-time">
+                <strong>🕐 Checked On:</strong>
+                {{ history[-1].time }}
+            </p>
+
+            <p class="history-risk">
+                <strong>⚠️ Risk Level:</strong>
+                {{ history[-1].risk }}
+            </p>
+
+            <p class="history-summary">
+                <strong>📊 Detection Summary:</strong>
+                {{ history[-1].summary }}
+            </p>
+
+            {% if history[-1].keywords %}
+                <p class="history-keywords">
+                    <strong>⚠️ Suspicious Keywords:</strong>
+                    {{ history[-1].keywords | join(", ") }}
+                </p>
+            {% endif %}
+
+            {% if history[-1].links %}
+                <p class="history-links">
+                    <strong>🔗 Suspicious Link:</strong>
+                    {% for link in history[-1].links %}
+                        {{ link }}
+                    {% endfor %}
+                </p>
+            {% endif %}
+
+        </div>
 
 
-        {% if history %}
+        <!-- Previous History Button -->
+        {% if history|length > 1 %}
 
-            {% for item in history %}
+            <button type="button" onclick="showPreviousHistory()">
+                📜 View Previous History
+            </button>
+
+        {% endif %}
+
+
+        <!-- Previous History -->
+        <div id="previousHistory" style="display: none;">
+
+            <h3>📜 Previous Messages</h3>
+
+            {% for item in history[:-1]|reverse %}
 
                 <div class="history-item
                     {% if 'SPAM MESSAGE' in item.result %}
@@ -716,93 +795,60 @@
                         genuine-item
                     {% endif %}">
 
-
                     <p>
                         <strong>Message:</strong>
                         {{ item.message }}
                     </p>
 
-
-                    <p class="history-result">
+                    <p>
                         <strong>Result:</strong>
                         {{ item.result }}
                     </p>
 
-
-                    <p class="history-reason">
-                        <strong>🔍 Detection Reason:</strong>
-                        {{ item.reason }}
-                    </p>
-
-
-                    <p class="history-suggestion">
-                        <strong>💡 Safety Suggestion:</strong>
-                        {{ item.suggestion }}
-                    </p>
-
-
-                    <p class="history-alternative">
-                        <strong>✍️ Safer Alternative:</strong>
-                        {{ item.alternative }}
-                    </p>
-
-
-                    <p class="history-time">
+                    <p>
                         <strong>🕐 Checked On:</strong>
                         {{ item.time }}
                     </p>
 
-
-                    <p class="history-risk">
+                    <p>
                         <strong>⚠️ Risk Level:</strong>
                         {{ item.risk }}
                     </p>
-
-
-                    <p class="history-summary">
-                        <strong>📊 Detection Summary:</strong>
-                        {{ item.summary }}
-                    </p>
-
-
-                    {% if item.keywords %}
-
-                        <p class="history-keywords">
-                            <strong>⚠️ Suspicious Keywords:</strong>
-                            {{ item.keywords | join(", ") }}
-                        </p>
-
-                    {% endif %}
-
-
-                    {% if item.links %}
-
-                        <p class="history-links">
-
-                            <strong>🔗 Suspicious Link:</strong>
-
-                            {% for link in item.links %}
-
-                                {{ link }}
-
-                            {% endfor %}
-
-                        </p>
-
-                    {% endif %}
-
 
                 </div>
 
             {% endfor %}
 
-        {% else %}
+        </div>
 
-            <p>No messages checked yet.</p>
+    {% else %}
 
-        {% endif %}
+        <p>No messages checked yet.</p>
 
-    </div>
+    {% endif %}
+
+</div>
+
+
+<script>
+
+function showPreviousHistory() {
+
+    const previousHistory = document.getElementById("previousHistory");
+
+    if (previousHistory.style.display === "none") {
+
+        previousHistory.style.display = "block";
+
+    } else {
+
+        previousHistory.style.display = "none";
+
+    }
+
+}
+
+</script>
 
 
 </body>
