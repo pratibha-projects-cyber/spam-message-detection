@@ -3,14 +3,12 @@ import csv
 import re
 from collections import Counter
 from datetime import datetime
-
 app = Flask(__name__)
 
 total_checked = 0
 spam_detected = 0
 genuine_detected = 0
 history = []
-
 # Suspicious keywords
 suspicious_keywords = [
     "free",
@@ -106,7 +104,37 @@ def check_message():
     summary = f"{len(found_keywords)} suspicious keyword(s) and {len(found_links)} link(s) detected."
 
     # Spam detection
-    if spam_score > ham_score:
+        # Strong spam pattern detection
+    strong_spam_score = 0
+
+    # Prize / winning pattern
+    if (
+        ("congratulations" in words and "win" in words)
+        or ("congratulations" in words and "winner" in words)
+        or ("won" in words and ("prize" in words or "cash" in words))
+    ):
+        strong_spam_score += 3
+
+    # Large money amount with suspicious words
+    money_pattern = re.findall(r'\b\d{5,}\b', message)
+
+    if money_pattern and any(
+        word in words
+        for word in ["win", "won", "winner", "prize", "cash", "reward"]
+    ):
+        strong_spam_score += 3
+
+    # Claim / reward pattern
+    if (
+        ("claim" in words and "reward" in words)
+        or ("claim" in words and "prize" in words)
+    ):
+        strong_spam_score += 2
+
+    # Link + suspicious content
+    if found_links and (found_keywords or strong_spam_score > 0):
+        strong_spam_score += 2
+    if spam_score > ham_score or strong_spam_score >= 3:
 
         spam_detected += 1
         if found_keywords and found_links:
