@@ -1,855 +1,1312 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Spam Message Detector</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Message Detection | Security Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy: #0b1220;
+            --panel: #151f32;
+            --panel-light: #1c2940;
+            --blue: #60a5fa;
+            --red: #f87171;
+            --green: #4ade80;
+            --text: #e5edf8;
+            --muted: #94a3b8;
+            --border: #29364b;
+        }
 
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
+            background: var(--navy);
+            color: var(--text);
         }
 
-        .header {
-            background: #0f172a;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 24px;
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button, textarea {
+            font: inherit;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 235px;
+            flex-shrink: 0;
+            padding: 27px 17px;
+            background: #101a2b;
+            border-right: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 0 35px 5px;
+            font-size: 18px;
             font-weight: bold;
         }
 
-        .container {
-            width: 90%;
-            max-width: 1000px;
-            margin: 35px auto;
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #1e3a5f;
+            font-size: 23px;
         }
 
-        .welcome {
-            text-align: center;
+        .nav-label {
+            margin: 24px 10px 12px;
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 7px;
+            padding: 13px 12px;
+            border-radius: 10px;
+            color: #b7c5d9;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #20324d;
+            color: white;
+        }
+
+        .nav-link.active {
+            border-left: 3px solid var(--blue);
+        }
+
+        .sidebar-note {
+            margin-top: 40px;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #131f32;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .main {
+            min-width: 0;
+            flex: 1;
+            padding: 27px 30px 40px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .eyebrow {
+            color: var(--blue);
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .topbar h1 {
+            margin: 8px 0 5px;
+            font-size: clamp(23px, 3vw, 31px);
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .user-chip {
+            padding: 11px 15px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--panel);
+            font-size: 13px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .section-title {
+            margin: 0 0 15px;
+            font-size: 17px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 15px;
             margin-bottom: 25px;
         }
 
-        .welcome h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+        .stat-card, .panel {
+            min-width: 0;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: var(--panel);
         }
 
-        .welcome p {
-            color: #64748b;
-            font-size: 16px;
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            padding: 19px;
         }
 
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 18px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        .stat-card::after {
+            position: absolute;
+            top: -27px;
+            right: -22px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ffffff08;
+            content: "";
         }
 
-        textarea {
-            width: 100%;
-            min-height: 150px;
-            box-sizing: border-box;
-            padding: 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            resize: vertical;
-            font-size: 16px;
-            outline: none;
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
         }
 
-        textarea:focus {
-            border-color: #2563eb;
+        .stat-label {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
         }
 
-        form button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 14px;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        form button:hover {
-            background: #1d4ed8;
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 18px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .spam-result {
-            background: #fff1f2;
-            color: #b91c1c;
-            border: 2px solid #ef4444;
-        }
-
-        .genuine-result {
-            background: #f0fdf4;
-            color: #15803d;
-            border: 2px solid #22c55e;
-        }
-
-        .info {
+        .stat-icon {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 25px;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: #23334c;
+            font-size: 19px;
         }
 
-        .info-box {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
-        }
-
-        .info-box h3 {
-            font-size: 15px;
-            margin-bottom: 10px;
-            color: #475569;
-        }
-
-        .info-box p {
-            font-size: 22px;
+        .stat-number {
+            margin-top: 16px;
+            font-size: 29px;
             font-weight: bold;
-            margin: 0;
+            overflow-wrap: anywhere;
         }
 
-        .history {
-            width: 90%;
-            max-width: 1000px;
-            margin: 35px auto;
+        .stat-caption {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 11px;
         }
 
-        .history h2 {
-            text-align: center;
-            margin-bottom: 20px;
+        .blue { color: var(--blue); }
+        .red { color: var(--red); }
+        .green { color: var(--green); }
+        .yellow { color: #fbbf24; }
+
+        .panel {
+            padding: 21px;
+            margin-bottom: 22px;
         }
 
-        .history-item {
-            background: white;
-            padding: 22px;
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
             margin-bottom: 18px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
         }
 
-        .spam-item {
-            border-left: 6px solid #ef4444;
-            background: #fff7f7;
+        .panel-heading h2 {
+            margin: 0;
+            font-size: 17px;
         }
 
-        .genuine-item {
-            border-left: 6px solid #22c55e;
-            background: #f7fff9;
+        .small-tag {
+            padding: 6px 9px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--muted);
+            font-size: 11px;
         }
 
-        .history-item p {
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(260px, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .message-input {
+            width: 100%;
+            min-height: 135px;
+            resize: vertical;
+            padding: 15px;
+            border: 1px solid #34445d;
+            border-radius: 11px;
+            outline: none;
+            background: #0d1727;
+            color: white;
             line-height: 1.6;
         }
 
-        .history-result {
+        .message-input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px #60a5fa18;
+        }
+
+        .primary-btn {
+            display: inline-block;
+            margin-top: 13px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 9px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
             font-weight: bold;
+            transition: 0.2s;
         }
 
-        .history-reason {
-            color: #b91c1c;
+        .primary-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
         }
 
-        .history-suggestion {
-            color: #475569;
+        .result-box {
+            margin-top: 18px;
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
         }
 
-        .history-alternative {
-            color: #15803d;
+        .spam-result {
+            border: 1px solid #7f3038;
+            background: #3a1822;
+            color: #fecaca;
         }
 
-        .history-time,
-        .history-risk,
-        .history-summary {
-            color: #475569;
+        .genuine-result {
+            border: 1px solid #236b4a;
+            background: #123426;
+            color: #bbf7d0;
         }
 
-        .history-keywords {
-            color: #b45309;
+        .feature-list {
+            display: grid;
+            gap: 12px;
         }
 
-        .history-links {
-            color: #2563eb;
-            word-break: break-word;
-        }
-
-
-        /* =========================
-           SPAM DANGER SCREEN
-           ========================= */
-
-        .danger-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #fff5f5;
+        .feature {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            animation: dangerFade 0.3s ease;
-            padding: 20px;
-            box-sizing: border-box;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: #111c2e;
         }
 
-        .danger-box {
-            width: 90%;
-            max-width: 700px;
-            box-sizing: border-box;
-            padding: 60px 30px;
-            text-align: center;
-            background: #fffafa;
-            border: 3px solid #ef4444;
-            border-radius: 25px;
-            box-shadow: 0 0 40px rgba(239, 68, 68, 0.20);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .danger-icon {
-            font-size: 75px;
-            position: relative;
-            animation: dangerPulse 0.8s infinite alternate;
-        }
-
-        .danger-title {
-            color: #b91c1c;
-            font-size: 34px;
-            font-weight: bold;
-            margin: 15px 0;
-            position: relative;
-        }
-
-        .danger-risk {
+        .feature-icon {
             font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            position: relative;
         }
 
-        .risk-high {
-            color: #dc2626;
+        .feature strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .feature p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 245px;
+        }
+
+        .monthly-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .monthly-item {
+            padding: 12px 8px;
+            border-radius: 10px;
+            background: #101a2b;
+            text-align: center;
+        }
+
+        .monthly-item strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 22px;
+        }
+
+        .monthly-item span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .suggestion {
+            border-left: 4px solid var(--blue);
+            background: #162941;
+        }
+
+        .suggestion h3 {
+            margin: 0 0 9px;
+            font-size: 15px;
+        }
+
+        .suggestion p {
+            margin: 0;
+            color: #c3d4e9;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        .history-item {
+            margin-bottom: 13px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-left: 4px solid #64748b;
+            border-radius: 11px;
+            background: #111c2e;
+            overflow-wrap: anywhere;
+        }
+
+        .history-item.spam-item {
+            border-left-color: var(--red);
+        }
+
+        .history-item.genuine-item {
+            border-left-color: var(--green);
+        }
+
+        .history-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .history-status {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .history-message {
+            margin: 12px 0;
+            color: #dbe7f5;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 9px;
+            margin-top: 12px;
+        }
+
+        .detail-cell {
+            padding: 10px;
+            border-radius: 8px;
+            background: #0c1626;
+            font-size: 12px;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .detail-cell strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .secondary-btn {
+            display: inline-block;
+            padding: 9px 13px;
+            border: 1px solid #40516a;
+            border-radius: 8px;
+            background: #1b2b42;
+            color: #e5edf8;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .secondary-btn:hover {
+            background: #263b57;
+        }
+
+        .empty-state {
+            padding: 28px 15px;
+            border: 1px dashed #34445d;
+            border-radius: 11px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        #previousHistory {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .footer {
+            padding: 16px 0 0;
+            color: var(--muted);
+            text-align: center;
+            font-size: 11px;
+        }
+
+        /* Full-screen result transitions */
+        .transition-screen {
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #070b14f7;
+        }
+
+        .transition-card {
+            width: 100%;
+            max-width: 440px;
+            padding: 35px 25px;
+            border: 1px solid #7f3038;
+            border-radius: 20px;
+            background: #171b29;
+            text-align: center;
+            box-shadow: 0 0 65px #ef444425;
+        }
+
+        .transition-card.safe-card {
+            border-color: #236b4a;
+            box-shadow: 0 0 65px #22c55e20;
+        }
+
+        .transition-icon {
+            margin-bottom: 15px;
+            font-size: 64px;
+            animation: pulse 1.1s infinite alternate;
+        }
+
+        .transition-card h2 {
+            margin: 0 0 12px;
+            color: var(--red);
+            font-size: 27px;
+        }
+
+        .transition-card.safe-card h2 {
+            color: var(--green);
+        }
+
+        .transition-card p {
+            color: #bdc9da;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .risk-pill {
+            display: inline-block;
+            margin: 8px 0;
+            padding: 8px 13px;
+            border-radius: 20px;
+            background: #45212b;
+            color: #fecaca;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .risk-medium {
-            color: #ea580c;
+            background: #45341c;
+            color: #fde68a;
         }
 
         .risk-low {
-            color: #ca8a04;
-        }
-
-        .danger-message {
-            color: #64748b;
-            font-size: 17px;
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .details-button {
-            display: inline-block;
-            padding: 13px 28px;
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .details-button:hover {
-            background: #b91c1c;
+            background: #183a2a;
+            color: #bbf7d0;
         }
 
         .countdown {
-            margin-top: 15px;
-            color: #64748b;
-            font-size: 14px;
-            position: relative;
+            margin: 18px 0;
+            color: white;
+            font-size: 15px;
         }
 
-
-        /* =========================
-           GENUINE SAFE SCREEN
-           ========================= */
-
-        .safe-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #f0fdf4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            animation: safeFade 0.3s ease;
-            padding: 20px;
-            box-sizing: border-box;
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
         }
 
-        .safe-box {
-            width: 90%;
-            max-width: 700px;
-            box-sizing: border-box;
-            padding: 60px 30px;
-            text-align: center;
-            background: #fafffb;
-            border: 3px solid #22c55e;
-            border-radius: 25px;
-            box-shadow: 0 0 40px rgba(34,197,94,0.20);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .safe-icon {
-            font-size: 75px;
-            position: relative;
-            animation: safePulse 0.8s infinite alternate;
-        }
-
-        .safe-title {
-            color: #15803d;
-            font-size: 34px;
-            font-weight: bold;
-            margin: 15px 0;
-            position: relative;
-        }
-
-        .safe-message {
-            color: #475569;
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .safe-countdown {
-            color: #64748b;
-            font-size: 14px;
-            position: relative;
-        }
-
-
-        /* =========================
-           ANIMATIONS
-           ========================= */
-
-        @keyframes dangerPulse {
-            from {
-                transform: scale(1);
+        @media (max-width: 1100px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            to {
-                transform: scale(1.12);
-            }
-        }
-
-        @keyframes dangerFade {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes safePulse {
-            from {
-                transform: scale(1);
-            }
-
-            to {
-                transform: scale(1.12);
-            }
-        }
-
-        @keyframes safeFade {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-
-        /* =========================
-           MOBILE
-           ========================= */
-
-        @media (max-width: 800px) {
-
-            .info {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .danger-title,
-            .safe-title {
-                font-size: 28px;
-            }
-
-            .danger-box,
-            .safe-box {
-                padding: 45px 20px;
-            }
-        }
-
-        @media (max-width: 500px) {
-
-            .info {
+            .dashboard-grid {
                 grid-template-columns: 1fr;
             }
+        }
 
-            .danger-icon,
-            .safe-icon {
-                font-size: 60px;
+        @media (max-width: 760px) {
+            .layout {
+                display: block;
             }
 
-            .danger-title,
-            .safe-title {
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .brand {
+                margin-bottom: 15px;
+            }
+
+            .nav-label, .sidebar-note {
+                display: none;
+            }
+
+            .sidebar nav {
+                display: flex;
+                gap: 7px;
+                overflow-x: auto;
+            }
+
+            .nav-link {
+                flex-shrink: 0;
+                margin: 0;
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .main {
+                padding: 22px 15px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .stats {
+                gap: 9px;
+            }
+
+            .stat-card {
+                padding: 13px;
+            }
+
+            .stat-number {
                 font-size: 24px;
             }
 
-            .safe-message {
-                font-size: 18px;
+            .stat-icon {
+                width: 31px;
+                height: 31px;
+                font-size: 16px;
+            }
+
+            .panel {
+                padding: 15px;
+            }
+
+            .history-details {
+                grid-template-columns: 1fr;
+            }
+
+            .monthly-grid {
+                gap: 6px;
+            }
+
+            .monthly-item strong {
+                font-size: 19px;
             }
         }
-
     </style>
 </head>
 
 <body>
 
+<div class="layout">
 
-    <!-- =========================
-         GENUINE SAFE SCREEN
-         ========================= -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">🛡️</div>
+            <span>MessageGuard</span>
+        </div>
 
-    {% if result and 'NOT SPAM / GENUINE MESSAGE' in result %}
+        <div class="nav-label">Workspace</div>
 
-    <div class="safe-screen">
+        <nav>
+            <a class="nav-link active" href="#dashboard">📊 Dashboard</a>
+            <a class="nav-link" href="#check-message">🔍 Check Message</a>
+            <a class="nav-link" href="#history">🕘 Previous History</a>
+            <a class="nav-link" href="#reports">📈 Reports</a>
+        </nav>
 
-        <div class="safe-box">
+        <div class="nav-label">Account</div>
 
-            <div class="safe-icon">
-                🛡️
+        <a class="nav-link" href="/logout">🚪 Logout</a>
+
+        <div class="sidebar-note">
+            <div style="font-size:22px; margin-bottom:8px;">🔐</div>
+            <strong style="color:#e5edf8;">Stay Protected</strong>
+            <div>Check suspicious messages before trusting their links or offers.</div>
+        </div>
+    </aside>
+
+    <main class="main" id="dashboard">
+
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">Cybersecurity / Overview</div>
+                <h1>Message Security Dashboard</h1>
+                <div class="muted">
+                    Welcome, {{ session.get('username', 'User') }} 👋
+                    <br>
+                    Monitor suspicious messages and review your detection history.
+                </div>
             </div>
 
-            <div class="safe-title">
-                SAFE MESSAGE
+            <div class="user-chip">
+                <span class="status-dot"></span>
+                Detection Dashboard
+            </div>
+        </header>
+
+        <section class="stats">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-label">Messages Checked</div>
+                    <div class="stat-icon">📩</div>
+                </div>
+                <div class="stat-number blue">{{ total_checked|default(0) }}</div>
+                <div class="stat-caption">Total messages analysed</div>
             </div>
 
-            <div class="safe-message">
-                Genuine message detected!
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-label">Spam Detected</div>
+                    <div class="stat-icon">🚨</div>
+                </div>
+                <div class="stat-number red">{{ spam_detected|default(0) }}</div>
+                <div class="stat-caption">Messages flagged as spam</div>
             </div>
 
-            <div class="safe-countdown">
-                Opening details in <span id="safeTimer">3</span> seconds...
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-label">Spam Rate</div>
+                    <div class="stat-icon">📈</div>
+                </div>
+                <div class="stat-number yellow">{{ spam_rate|default(0) }}%</div>
+                <div class="stat-caption">Share of detected spam</div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-label">Genuine Messages</div>
+                    <div class="stat-icon">✅</div>
+                </div>
+                <div class="stat-number green">{{ genuine_detected|default(0) }}</div>
+                <div class="stat-caption">Messages not flagged as spam</div>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+
+            <section class="panel" id="check-message">
+                <div class="panel-heading">
+                    <h2>🔍 Check a Message</h2>
+                    <span class="small-tag">Message Analysis</span>
+                </div>
+
+                <p class="muted">
+                    Paste a message below to check for suspicious words and links.
+                </p>
+
+                <form action="/check" method="POST">
+                    <textarea
+                        class="message-input"
+                        name="message"
+                        placeholder="Paste your message here..."
+                        required
+                    ></textarea>
+
+                    <button class="primary-btn" type="submit">
+                        🔍 Analyse Message
+                    </button>
+                </form>
+
+                {% if result %}
+                    <div class="result-box
+                        {% if 'SPAM MESSAGE' in result %}
+                            spam-result
+                        {% else %}
+                            genuine-result
+                        {% endif %}">
+                        <strong>{{ result }}</strong>
+
+                        {% if history and history|length > 0 %}
+                            <p><strong>Reason:</strong> {{ history[-1].reason }}</p>
+                            <p><strong>Risk:</strong> {{ history[-1].risk }}</p>
+                            <p><strong>Summary:</strong> {{ history[-1].summary }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <h2>🧰 Security Features</h2>
+                    <span class="small-tag">Protection Tools</span>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature">
+                        <div class="feature-icon">🔎</div>
+                        <div>
+                            <strong>Suspicious Pattern Detection</strong>
+                            <p>Checks messages for suspicious words and links.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="feature-icon">⚡</div>
+                        <div>
+                            <strong>Fast Analysis</strong>
+                            <p>Displays the analysis result after submission.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="feature-icon">🛡️</div>
+                        <div>
+                            <strong>Safety Guidance</strong>
+                            <p>Provides suggestions to help users handle suspicious messages.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
         </div>
 
-    </div>
+        <section class="charts-grid" id="reports">
 
-    <script>
+            <div class="panel">
+                <div class="panel-heading">
+                    <h2>📊 Message Security Overview</h2>
+                    <span class="small-tag">All Records</span>
+                </div>
 
-        let safeTimeLeft = 3;
+                <div class="chart-wrap">
+                    <canvas id="messagePieChart"></canvas>
+                </div>
 
-        const safeTimerInterval = setInterval(function () {
+                <div class="panel-heading" style="margin-top:24px; margin-bottom:0;">
+                    <h2>📅 Monthly Overview</h2>
+                    <span class="small-tag">Current Month</span>
+                </div>
 
-            safeTimeLeft--;
+                <div class="monthly-grid">
+                    <div class="monthly-item">
+                        <strong class="blue">{{ monthly_total|default(0) }}</strong>
+                        <span>Total Checked</span>
+                    </div>
 
-            document.getElementById("safeTimer").textContent = safeTimeLeft;
+                    <div class="monthly-item">
+                        <strong class="red">{{ monthly_spam|default(0) }}</strong>
+                        <span>Spam</span>
+                    </div>
 
-            if (safeTimeLeft <= 0) {
+                    <div class="monthly-item">
+                        <strong class="green">{{ monthly_genuine|default(0) }}</strong>
+                        <span>Genuine</span>
+                    </div>
+                </div>
+            </div>
 
-                clearInterval(safeTimerInterval);
+            <div class="panel">
+                <div class="panel-heading">
+                    <h2>📈 Scam Pattern Overview</h2>
+                    <span class="small-tag">Pattern Categories</span>
+                </div>
 
-                window.location.href = "/genuine-details";
+                <div class="chart-wrap">
+                    <canvas id="scamBarChart"></canvas>
+                </div>
 
-            }
+                <p class="muted" style="margin-top:16px;">
+                    The chart uses the category counts provided by the application.
+                </p>
+            </div>
 
-        }, 1000);
+        </section>
 
-    </script>
+        <section class="panel">
+            <div class="panel-heading">
+                <h2>💡 Safe Protection Suggestion</h2>
+                <span class="small-tag">Safety Advice</span>
+            </div>
 
-    {% endif %}
+            <div class="suggestion">
+                <div style="padding:16px;">
+                    <h3>🛡️ Stay Alert</h3>
+                    <p>{{ safe_suggestion|default('Avoid clicking unknown links or sharing personal information. Verify suspicious offers through official sources.') }}</p>
+                </div>
+            </div>
+        </section>
 
+        <section class="panel" id="history">
+            <div class="panel-heading">
+                <h2>🕘 Recent Message Activity</h2>
+                <span class="small-tag">
+                    {{ history|length if history else 0 }} Records
+                </span>
+            </div>
 
-    <!-- =========================
-         SPAM DANGER SCREEN
-         ========================= -->
+            {% if history and history|length > 0 %}
 
-    {% if result and 'SPAM MESSAGE' in result %}
+                {% for item in history|reverse %}
+                    {% if loop.index <= 5 %}
+                        <article class="history-item
+                            {% if 'SPAM MESSAGE' in item.result %}
+                                spam-item
+                            {% else %}
+                                genuine-item
+                            {% endif %}">
 
-    <div class="danger-screen">
+                            <div class="history-top">
+                                <div class="history-status
+                                    {% if 'SPAM MESSAGE' in item.result %}
+                                        red
+                                    {% else %}
+                                        green
+                                    {% endif %}">
+                                    {{ item.result }}
+                                </div>
 
-        <div class="danger-box">
+                                <span class="small-tag">{{ item.time }}</span>
+                            </div>
 
-            <div class="danger-icon">
+                            <div class="history-message">{{ item.message }}</div>
 
-                {% if 'HIGH RISK' in history[-1].risk %}
-                    🚨
-                {% elif 'MEDIUM RISK' in history[-1].risk %}
-                    ⚠️
-                {% else %}
-                    🔶
+                            <div class="history-details">
+                                <div class="detail-cell">
+                                    <strong>Detection Reason</strong>
+                                    {{ item.reason }}
+                                </div>
+
+                                <div class="detail-cell">
+                                    <strong>Risk Level</strong>
+                                    {{ item.risk }}
+                                </div>
+
+                                <div class="detail-cell">
+                                    <strong>Suspicious Keywords</strong>
+                                    {% if item.keywords %}
+                                        {{ item.keywords|join(', ') if item.keywords is sequence and item.keywords is not string else item.keywords }}
+                                    {% else %}
+                                        None recorded
+                                    {% endif %}
+                                </div>
+
+                                <div class="detail-cell">
+                                    <strong>Links Found</strong>
+                                    {% if item.links %}
+                                        {{ item.links|join(', ') if item.links is sequence and item.links is not string else item.links }}
+                                    {% else %}
+                                        None recorded
+                                    {% endif %}
+                                </div>
+
+                                <div class="detail-cell">
+                                    <strong>Detection Summary</strong>
+                                    {{ item.summary }}
+                                </div>
+
+                                <div class="detail-cell">
+                                    <strong>Safety Suggestion</strong>
+                                    {{ item.suggestion }}
+                                </div>
+                            </div>
+
+                            {% if loop.first %}
+                                <div class="history-actions">
+                                    {% if 'SPAM MESSAGE' in item.result %}
+                                        <a class="secondary-btn" href="/spam-details">View Spam Details →</a>
+                                    {% else %}
+                                        <a class="secondary-btn" href="/genuine-details">View Message Details →</a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                        </article>
+                    {% endif %}
+                {% endfor %}
+
+                {% if history|length > 5 %}
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                      onclick="toggleOlderHistory(event)"
+                    >
+                        Show Older History
+                    </button>
+
+                    <div id="previousHistory">
+                        {% for item in history|reverse %}
+                            {% if loop.index > 5 %}
+                                <article class="history-item
+                                    {% if 'SPAM MESSAGE' in item.result %}
+                                        spam-item
+                                    {% else %}
+                                        genuine-item
+                                    {% endif %}">
+
+                                    <div class="history-top">
+                                        <strong>{{ item.result }}</strong>
+                                        <span class="small-tag">{{ item.time }}</span>
+                                    </div>
+
+                                    <div class="history-message">{{ item.message }}</div>
+
+                                    <div class="muted">
+                                        Risk: {{ item.risk }} |
+                                        Reason: {{ item.reason }}
+                                    </div>
+                                </article>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 {% endif %}
 
-            </div>
+            {% else %}
+                <div class="empty-state">
+                    <div style="font-size:35px;">📭</div>
+                    <strong>No messages checked yet</strong>
+                    <p>Check your first message to see its result and history here.</p>
+                </div>
+            {% endif %}
+        </section>
 
-            <div class="danger-title">
-                DANGER DETECTED
-            </div>
-
-            <div class="danger-risk
-                {% if 'HIGH RISK' in history[-1].risk %}
-                    risk-high
-                {% elif 'MEDIUM RISK' in history[-1].risk %}
-                    risk-medium
-                {% else %}
-                    risk-low
-                {% endif %}">
-
-                {{ history[-1].risk }}
-
-            </div>
-
-            <div class="danger-message">
-                Spam message detected!
-            </div>
-
-            <button class="details-button" onclick="openDetails()">
-                View Details →
-            </button>
-
-            <div class="countdown">
-                Opening details in <span id="timer">3</span> seconds...
-            </div>
-
+        <div class="footer">
+            Fake Message Detection System · Use results as a safety aid, not a guarantee.
         </div>
 
+    </main>
+</div>
+
+<div id="chartData"
+     data-spam="{{ spam_detected | default(0) }}"
+     data-genuine="{{ genuine_detected | default(0) }}"
+     data-prize="{{ prize_count | default(0) }}"
+     data-money="{{ money_count | default(0) }}"
+     data-offer="{{ offer_count | default(0) }}"
+     data-verification="{{ verification_count | default(0) }}"
+     data-link="{{ link_count | default(0) }}"
+     data-urgent="{{ urgent_count | default(0) }}">
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+const chartData = document.getElementById("chartData");
+
+const spamCount = Number(chartData.dataset.spam);
+const genuineCount = Number(chartData.dataset.genuine);
+
+    const chartText = "#d5deeb";
+    const chartGrid = "#29364b";
+
+    // Message Doughnut Chart
+    const pieCanvas = document.getElementById("messagePieChart");
+
+    if (pieCanvas && typeof Chart !== "undefined") {
+        new Chart(pieCanvas, {
+            type: "doughnut",
+            data: {
+                labels: ["Spam Messages", "Genuine Messages"],
+                datasets: [{
+                    data: [spamCount, genuineCount],
+                    backgroundColor: ["#f87171", "#60a5fa"],
+                    borderColor: ["#151f32", "#151f32"],
+                    borderWidth: 4,
+                    hoverOffset: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "65%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            color: chartText,
+                            padding: 18
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Suspicious Pattern Bar Chart
+    const barCanvas = document.getElementById("scamBarChart");
+
+    if (barCanvas && typeof Chart !== "undefined") {
+        new Chart(barCanvas, {
+            type: "bar",
+            data: {
+                labels: [
+                    "Prize / Reward",
+                    "Financial / Money",
+                    "Fake Offer",
+                    "Account Verification",
+                    "Suspicious Link",
+                    "Urgent Language"
+                ],
+                datasets: [{
+                    label: "Detected Patterns",
+                    data: [
+    Number(chartData.dataset.prize),
+    Number(chartData.dataset.money),
+    Number(chartData.dataset.offer),
+    Number(chartData.dataset.verification),
+    Number(chartData.dataset.link),
+    Number(chartData.dataset.urgent)
+],
+                   
+                    backgroundColor: [
+                        "#a78bfa",
+                        "#4ade80",
+                        "#fb923c",
+                        "#60a5fa",
+                        "#f87171",
+                        "#facc15"
+                    ],
+                    borderRadius: 5,
+                    maxBarThickness: 36
+                }]
+            },
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: chartText,
+                            precision: 0
+                        },
+                        grid: {
+                            color: chartGrid
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: chartText
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Older History Button
+function toggleOlderHistory(event) {
+    const historySection = document.getElementById("previousHistory");
+
+    if (!historySection || !event || !event.currentTarget) {
+        return;
+    }
+
+    const button = event.currentTarget;
+
+    if (historySection.style.display === "block") {
+        historySection.style.display = "none";
+        button.textContent = "Show Older History";
+    } else {
+        historySection.style.display = "block";
+        button.textContent = "Hide Older History";
+    }
+}
+</script>
+{% if result and 'SPAM MESSAGE' in result %}
+    {% set current_risk = history[-1].risk if history else '⚠️ RISK UNKNOWN' %}
+
+    <div class="transition-screen">
+        <div class="transition-card">
+            <div class="transition-icon">🚨</div>
+            <h2>SPAM DETECTED</h2>
+            <p>A potentially suspicious message was detected.</p>
+
+            <div class="risk-pill
+                {% if 'HIGH' in current_risk %}
+                    risk-high
+                {% elif 'LOW' in current_risk %}
+                    risk-low
+                {% else %}
+                    risk-medium
+                {% endif %}">
+                {{ current_risk }}
+            </div>
+
+            <p>Review the details before trusting this message.</p>
+
+            <a class="primary-btn" href="/spam-details">
+                View Details Now
+            </a>
+
+            <div class="countdown">
+                Opening details in <strong id="spamCountdown">3</strong> seconds...
+            </div>
+        </div>
     </div>
 
     <script>
+        (function () {
+            let seconds = 3;
+            const counter = document.getElementById("spamCountdown");
 
-        let timeLeft = 3;
+            const timer = setInterval(function () {
+                seconds -= 1;
 
-        const spamTimer = setInterval(function () {
+                if (counter) {
+                    counter.textContent = seconds;
+                }
 
-            timeLeft--;
-
-            document.getElementById("timer").textContent = timeLeft;
-
-            if (timeLeft <= 0) {
-
-                clearInterval(spamTimer);
-
-                openDetails();
-
-            }
-
-        }, 1000);
-
-
-        function openDetails() {
-
-            window.location.href = "/spam-details";
-
-        }
-
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    window.location.href = "/spam-details";
+                }
+            }, 1000);
+        })();
     </script>
 
-    {% endif %}
+{% elif result and 'NOT SPAM / GENUINE MESSAGE' in result %}
 
+    <div class="transition-screen">
+        <div class="transition-card safe-card">
+            <div class="transition-icon">🛡️</div>
+            <h2>GENUINE MESSAGE</h2>
+            <p>No strong spam pattern was detected in this message.</p>
 
-    <!-- =========================
-         MAIN DASHBOARD
-         ========================= -->
+            <div class="risk-pill risk-low">✅ LOWER DETECTED RISK</div>
 
-    <div class="header">
-        🛡️ Spam Message Detector
+            <p>Still use caution with unfamiliar senders and links.</p>
+
+            <a class="primary-btn" href="/genuine-details">
+                View Details Now
+            </a>
+
+            <div class="countdown">
+                Opening details in <strong id="genuineCountdown">3</strong> seconds...
+            </div>
+        </div>
     </div>
 
-
-    <div class="container">
-
-        <div class="welcome">
-
-            <h1>
-                Message Security Dashboard
-            </h1>
-
-            <p>
-                Check whether a message is Spam or Genuine using our detection system.
-            </p>
-
-        </div>
-
-
-        <div class="card">
-
-            <form action="/check" method="POST">
-
-                <textarea
-                    name="message"
-                    placeholder="Enter your message here..."
-                    required></textarea>
-
-                <button type="submit">
-                    🔍 Check Message
-                </button>
-
-            </form>
-
-
-            {% if result %}
-
-                <div class="result
-                    {% if 'SPAM MESSAGE' in result %}
-                        spam-result
-                    {% else %}
-                        genuine-result
-                    {% endif %}">
-
-                    {{ result }}
-
-                </div>
-
-            {% endif %}
-
-        </div>
-
-
-        <!-- DASHBOARD INFORMATION -->
-
-        <div class="info">
-
-            <div class="info-box">
-                <h3>📊 Messages Checked</h3>
-                <p>{{ total_checked }}</p>
-            </div>
-
-            <div class="info-box">
-                <h3>🚨 Spam Detected</h3>
-                <p>{{ spam_detected }}</p>
-            </div>
-
-            <div class="info-box">
-                <h3>📈 Spam Rate</h3>
-                <p>{{ spam_rate }}%</p>
-            </div>
-
-            <div class="info-box">
-                <h3>✅ Genuine Messages</h3>
-                <p>{{ genuine_detected }}</p>
-            </div>
-
-            <div class="info-box">
-                <h3>🔍 Detection</h3>
-                <p>Analyze messages for suspicious words.</p>
-            </div>
-
-            <div class="info-box">
-                <h3>⚡ Fast</h3>
-                <p>Get the result quickly after checking a message.</p>
-            </div>
-
-            <div class="info-box">
-                <h3>🛡️ Protection</h3>
-                <p>Helps identify potentially unwanted messages.</p>
-            </div>
-
-        </div>
-
-    </div>
-
-
-  <!-- =========================
-     MESSAGE HISTORY
-     ========================= -->
-
-<div class="history">
-
-    <h2>📋 Message History</h2>
-
-    {% if history %}
-
-        <!-- Current History -->
-        <div class="history-item
-            {% if 'SPAM MESSAGE' in history[-1].result %}
-                spam-item
-            {% else %}
-                genuine-item
-            {% endif %}">
-
-            <p>
-                <strong>Message:</strong>
-                {{ history[-1].message }}
-            </p>
-
-            <p class="history-result">
-                <strong>Result:</strong>
-                {{ history[-1].result }}
-            </p>
-
-            <p class="history-reason">
-                <strong>🔍 Detection Reason:</strong>
-                {{ history[-1].reason }}
-            </p>
-
-            <p class="history-suggestion">
-                <strong>💡 Safety Suggestion:</strong>
-                {{ history[-1].suggestion }}
-            </p>
-
-            <p class="history-alternative">
-                <strong>✍️ Safer Alternative:</strong>
-                {{ history[-1].alternative }}
-            </p>
-
-            <p class="history-time">
-                <strong>🕐 Checked On:</strong>
-                {{ history[-1].time }}
-            </p>
-
-            <p class="history-risk">
-                <strong>⚠️ Risk Level:</strong>
-                {{ history[-1].risk }}
-            </p>
-
-            <p class="history-summary">
-                <strong>📊 Detection Summary:</strong>
-                {{ history[-1].summary }}
-            </p>
-
-            {% if history[-1].keywords %}
-                <p class="history-keywords">
-                    <strong>⚠️ Suspicious Keywords:</strong>
-                    {{ history[-1].keywords | join(", ") }}
-                </p>
-            {% endif %}
-
-            {% if history[-1].links %}
-                <p class="history-links">
-                    <strong>🔗 Suspicious Link:</strong>
-                    {% for link in history[-1].links %}
-                        {{ link }}
-                    {% endfor %}
-                </p>
-            {% endif %}
-
-        </div>
-
-
-        <!-- Previous History Button -->
-        {% if history|length > 1 %}
-
-            <button type="button" onclick="showPreviousHistory()">
-                📜 View Previous History
-            </button>
-
-        {% endif %}
-
-
-        <!-- Previous History -->
-        <div id="previousHistory" style="display: none;">
-
-            <h3>📜 Previous Messages</h3>
-
-            {% for item in history[:-1]|reverse %}
-
-                <div class="history-item
-                    {% if 'SPAM MESSAGE' in item.result %}
-                        spam-item
-                    {% else %}
-                        genuine-item
-                    {% endif %}">
-
-                    <p>
-                        <strong>Message:</strong>
-                        {{ item.message }}
-                    </p>
-
-                    <p>
-                        <strong>Result:</strong>
-                        {{ item.result }}
-                    </p>
-
-                    <p>
-                        <strong>🕐 Checked On:</strong>
-                        {{ item.time }}
-                    </p>
-
-                    <p>
-                        <strong>⚠️ Risk Level:</strong>
-                        {{ item.risk }}
-                    </p>
-
-                </div>
-
-            {% endfor %}
-
-        </div>
-
-    {% else %}
-
-        <p>No messages checked yet.</p>
-
-    {% endif %}
-
-</div>
-
-
-<script>
-
-function showPreviousHistory() {
-
-    const previousHistory = document.getElementById("previousHistory");
-
-    if (previousHistory.style.display === "none") {
-
-        previousHistory.style.display = "block";
-
-    } else {
-
-        previousHistory.style.display = "none";
-
-    }
-
-}
-
-</script>
-
+    <script>
+        (function () {
+            let seconds = 3;
+            const counter = document.getElementById("genuineCountdown");
+
+            const timer = setInterval(function () {
+                seconds -= 1;
+
+                if (counter) {
+                    counter.textContent = seconds;
+                }
+
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    window.location.href = "/genuine-details";
+                }
+            }, 1000);
+        })();
+    </script>
+{% endif %}
 
 </body>
 </html>

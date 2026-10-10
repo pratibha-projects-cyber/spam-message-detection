@@ -1,195 +1,300 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Genuine Message Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genuine Message Details | Spam Message Detector</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
+            background: #0b1220;
+            color: #e5edf8;
+            min-height: 100vh;
         }
 
         .header {
-            background: #0f172a;
-            color: white;
-            padding: 20px;
-            text-align: center;
+            background: #111c30;
+            padding: 22px 7%;
+            border-bottom: 1px solid #29364b;
+        }
+
+        .header h1 {
+            margin: 0;
             font-size: 24px;
-            font-weight: bold;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: #9eacc2;
+            font-size: 14px;
         }
 
         .container {
-            width: 90%;
-            max-width: 800px;
-            margin: 40px auto;
-        }
-
-        .title {
-            text-align: center;
-            color: #15803d;
-            font-size: 30px;
-            font-weight: bold;
-            margin-bottom: 25px;
+            max-width: 900px;
+            width: 92%;
+            margin: 35px auto;
         }
 
         .status-card {
-            text-align: center;
-            padding: 30px;
-            background: #f0fdf4;
-            border: 2px solid #22c55e;
-            border-radius: 18px;
-            margin-bottom: 25px;
-        }
-
-        .status-icon {
-            font-size: 60px;
-        }
-
-        .status-title {
-            color: #15803d;
-            font-size: 28px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .status-message {
-            color: #475569;
-            font-size: 17px;
-            font-weight: 500;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 20px;
+            background: #132238;
+            border: 1px solid #29415d;
             border-radius: 16px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 28px;
+            margin-bottom: 22px;
         }
 
-        .label {
+        .status {
+            display: inline-block;
+            padding: 9px 14px;
+            border-radius: 30px;
+            background: #123d35;
+            color: #6ee7b7;
+            font-size: 13px;
             font-weight: bold;
-            color: #475569;
-            margin-bottom: 8px;
+        }
+
+        h2 {
+            margin-top: 18px;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #a9b8cc;
+            line-height: 1.7;
+        }
+
+        .section {
+            background: #111c30;
+            border: 1px solid #29364b;
+            border-radius: 14px;
+            padding: 23px;
+            margin-bottom: 18px;
+            overflow-wrap: anywhere;
+        }
+
+        .section h3 {
+            margin-top: 0;
+            color: #93c5fd;
+            font-size: 17px;
         }
 
         .message {
-            background: #f1f5f9;
-            padding: 15px;
+            background: #0b1220;
+            border: 1px solid #29364b;
+            padding: 17px;
             border-radius: 10px;
-            line-height: 1.6;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .detail {
+            color: #d2dcec;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
         }
 
         .risk {
-            color: #15803d;
-            font-size: 22px;
+            color: #6ee7b7;
             font-weight: bold;
         }
 
-        .back-button {
+        .tag {
             display: inline-block;
-            padding: 12px 24px;
-            background: #0f172a;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: bold;
+            margin: 4px;
+            padding: 7px 10px;
+            border-radius: 7px;
+            background: #26354b;
+            color: #dbeafe;
+            font-size: 13px;
+            overflow-wrap: anywhere;
         }
 
-        .back-button:hover {
-            background: #1e293b;
+        .empty {
+            color: #9eacc2;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .secondary {
+            background: #26354b;
+            color: #e5edf8;
+            border: 1px solid #3b4d66;
+        }
+
+        .btn:hover {
+            opacity: 0.88;
+        }
+
+        .footer {
+            text-align: center;
+            color: #71819a;
+            padding: 20px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 20px 5%;
+            }
+
+            .container {
+                width: 94%;
+                margin-top: 20px;
+            }
+
+            .status-card,
+            .section {
+                padding: 19px;
+            }
+
+            .header h1 {
+                font-size: 21px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="header">
-        🛡️ Spam Message Detector
-    </div>
+    <header class="header">
+        <h1>🛡️ Spam Message Detector</h1>
+        <p>Genuine Message Analysis and Safety Details</p>
+    </header>
 
-    <div class="container">
+    <main class="container">
 
-        <div class="title">
-            ✅ Genuine Message Information
+        <section class="status-card">
+            <span class="status">✓ GENUINE PATTERN DETECTED</span>
+
+            <h2>Message Analysis Results</h2>
+
+            <p class="description">
+                The message was classified as genuine by the detection
+                system. This does not guarantee that the sender or every
+                link is safe, so verify unfamiliar messages independently.
+            </p>
+
+            <p class="detail">
+                <strong>Risk level:</strong>
+                <span class="risk">
+                    {{ data.risk | default('LOW') }}
+                </span>
+            </p>
+
+            <p class="detail">
+                <strong>Checked on:</strong>
+                {{ data.time | default('Not available') }}
+            </p>
+        </section>
+
+        <section class="section">
+            <h3>📩 Message Content</h3>
+
+            <div class="message">{{ data.message | default('No message available') }}</div>
+        </section>
+
+        <section class="section">
+            <h3>🔍 Detection Summary</h3>
+
+            <p class="detail">
+                {{ data.summary | default('No additional summary available.') }}
+            </p>
+
+            <p class="detail">
+                <strong>Reason:</strong>
+                {{ data.reason | default('No additional reason available.') }}
+            </p>
+        </section>
+
+        <section class="section">
+            <h3>💡 Safety Suggestion</h3>
+
+            <p class="detail">
+                {{ data.suggestion | default('Verify unfamiliar senders before sharing personal information.') }}
+            </p>
+
+            {% if data.alternative %}
+                <p class="detail">
+                    <strong>Alternative advice:</strong>
+                    {{ data.alternative }}
+                </p>
+            {% endif %}
+        </section>
+
+        <section class="section">
+            <h3>🔑 Detected Keywords</h3>
+
+            {% if data.keywords %}
+                {% for keyword in data.keywords %}
+                    {% if keyword %}
+                        <span class="tag">{{ keyword }}</span>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="empty">No suspicious keywords were recorded.</p>
+            {% endif %}
+        </section>
+
+        <section class="section">
+            <h3>🔗 Links Found</h3>
+
+            {% if data.links %}
+                {% for link in data.links %}
+                    {% if link %}
+                        <p class="detail">{{ link }}</p>
+                    {% endif %}
+                {% endfor %}
+                <p class="description">
+                    Avoid opening unfamiliar links until you have verified
+                    the destination independently.
+                </p>
+            {% else %}
+                <p class="empty">No links were recorded in this message.</p>
+            {% endif %}
+        </section>
+
+        <div class="actions">
+            <a class="btn primary" href="{{ url_for('home') }}">
+                ← Back to Dashboard
+            </a>
+
+            <a class="btn secondary" href="{{ url_for('logout') }}">
+                Logout
+            </a>
         </div>
 
-        <div class="status-card">
+    </main>
 
-            <div class="status-icon">
-                🛡️
-            </div>
-
-            <div class="status-title">
-                SAFE MESSAGE
-            </div>
-
-            <div class="status-message">
-                No strong spam pattern detected
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="label">
-                Detected Message
-            </div>
-
-            <div class="message">
-                {{ data.message }}
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="label">
-                Risk Level
-            </div>
-
-            <div class="risk">
-                {{ data.risk }}
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="label">
-                Detection Reason
-            </div>
-
-            {{ data.reason }}
-
-        </div>
-
-        <div class="card">
-
-            <div class="label">
-                Safety Suggestion
-            </div>
-
-            {{ data.suggestion }}
-
-        </div>
-
-        <div class="card">
-
-            <div class="label">
-                Checked Time
-            </div>
-
-            {{ data.time }}
-
-        </div>
-
-        <a href="/" class="back-button">
-            ← Back to Dashboard
-        </a>
-
-    </div>
+    <footer class="footer">
+        Spam Message Detector | Message Safety Dashboard
+    </footer>
 
 </body>
 </html>
