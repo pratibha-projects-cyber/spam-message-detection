@@ -684,17 +684,40 @@ def check_message():
    
 
 # Spam details page
+
 @app.route("/spam-details")
 def spam_details():
     if "user_id" not in session:
         return redirect(url_for("login"))
 
-    if history:
+    conn = sqlite3.connect("history.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
 
-        return render_template(
-            "spam_details.html",
-            data=history[-1]
+    cursor.execute("""
+        SELECT message, result, reason, suggestion, alternative,
+               keywords, links, time, risk, summary
+        FROM history
+        WHERE user_id = ?
+        AND result LIKE '%SPAM MESSAGE%'
+        ORDER BY id DESC
+        LIMIT 1
+    """, (session["user_id"],))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        data = dict(row)
+        data["keywords"] = (
+            data["keywords"].split(",")
+            if data["keywords"] else []
         )
+        data["links"] = (
+            data["links"].split(",")
+            if data["links"] else []
+        )
+        return render_template("spam_details.html", data=data)
 
     return redirect(url_for("home"))
 
