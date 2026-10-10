@@ -431,61 +431,63 @@ def check_message():
     )
 
 
+  
     # Strong spam pattern
     strong_spam_score = 0
 
-
-    # Prize / winning pattern
+    # Prize or reward combined with money
     if (
-        ("congratulations" in words and "win" in words)
-        or
-        ("congratulations" in words and "winner" in words)
-        or
-        (
-            "won" in words
-            and
-            ("prize" in words or "cash" in words)
+        ("prize" in words or "reward" in words or "winner" in words)
+        and ("money" in words or "cash" in words)
+    ):
+        strong_spam_score += 3
+
+    # Prize or reward combined with urgency
+    if (
+        ("prize" in words or "reward" in words or "winner" in words)
+        and (
+            "today" in words
+            or "urgent" in words
+            or "limited" in words
         )
     ):
-        strong_spam_score += 3
+        strong_spam_score += 2
 
-
-    # Large money amount
-    money_pattern = re.findall(
-        r"\b\d{5,}\b",
-        message
-    )
-
-    if money_pattern and any(
-        word in words
-        for word in [
-            "win",
-            "won",
-            "winner",
-            "prize",
-            "cash",
-            "reward"
-        ]
+    # Request to open a link with prize or money language
+    if (
+        "link" in words
+        and ("open" in words or "click" in words)
+        and (
+            "prize" in words
+            or "reward" in words
+            or "money" in words
+            or "cash" in words
+        )
     ):
-        strong_spam_score += 3
-
+        strong_spam_score += 2
 
     # Claim / reward pattern
     if (
         ("claim" in words and "reward" in words)
-        or
-        ("claim" in words and "prize" in words)
+        or ("claim" in words and "prize" in words)
     ):
         strong_spam_score += 2
 
-
-    # Link + suspicious content
-    if found_links and (
-        found_keywords
-        or
-        strong_spam_score > 0
-    ):
+    # Suspicious link combined with suspicious keywords
+    if found_links and found_keywords:
         strong_spam_score += 2
+
+    # Large money amount
+    money_pattern = re.findall(r"\b\d{5,}\b", message)
+
+    if money_pattern and any(
+        word in words
+        for word in [
+            "win", "won", "winner", "prize", "cash", "reward"
+        ]
+    ):
+        strong_spam_score += 3
+
 
 
     # Spam detection
